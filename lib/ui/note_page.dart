@@ -32,7 +32,6 @@ class _NotePageState extends State<NotePage> {
 
   var _editableNote;
 
-  // the timer variable responsible to call persistData function every 5 seconds and cancel the timer when the page pops.
   Timer _persistenceTimer;
 
   final GlobalKey<ScaffoldState> _globalKey = new GlobalKey<ScaffoldState>();
@@ -52,9 +51,6 @@ class _NotePageState extends State<NotePage> {
       _isNewNote = true;
     }
     _persistenceTimer = new Timer.periodic(Duration(seconds: 5), (timer) {
-      // call insert query here
-      print("5 seconds passed");
-      print("editable note id: ${_editableNote.id}");
       _persistData();
     });
     super.initState();
@@ -96,7 +92,6 @@ class _NotePageState extends State<NotePage> {
               Flexible(
                 child: Container(
                   padding: EdgeInsets.all(5),
-//          decoration: BoxDecoration(border: Border.all(color: CentralStation.borderColor,width: 1 ),borderRadius: BorderRadius.all(Radius.circular(10)) ),
                   child: EditableText(
                       onChanged: (str) => {updateNoteObject()},
                       maxLines: null,
@@ -116,10 +111,13 @@ class _NotePageState extends State<NotePage> {
               Flexible(
                   child: Container(
                       padding: EdgeInsets.all(5),
-//    decoration: BoxDecoration(border: Border.all(color: CentralStation.borderColor,width: 1),borderRadius: BorderRadius.all(Radius.circular(10)) ),
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: CentralStation.borderColor, width: 1),
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
                       child: EditableText(
                         onChanged: (str) => {updateNoteObject()},
-                        maxLines: 300, // line limit extendable later
+                        maxLines: 300,
                         controller: _contentController,
                         focusNode: _contentFocus,
                         style: TextStyle(color: Colors.black, fontSize: 20),
@@ -136,7 +134,11 @@ class _NotePageState extends State<NotePage> {
   }
 
   Widget _pageTitle() {
-    return Text(_editableNote.id == -1 ? "New Note" : "Edit Note");
+    return Text(
+      _editableNote.id == -1 ? "New Note" : "Edit Note",
+      style: TextStyle(
+          color: noteColor == Colors.white ? Colors.black : Colors.white),
+    );
   }
 
   List<Widget> _archiveAction(BuildContext context) {
@@ -216,44 +218,30 @@ class _NotePageState extends State<NotePage> {
       var noteDB = NotesDBHandler();
 
       if (_editableNote.id == -1) {
-        Future<int> autoIncrementedId =
-            noteDB.insertNote(_editableNote, true); // for new note
-        // set the id of the note from the database after inserting the new note so for next persisting
+        Future<int> autoIncrementedId = noteDB.insertNote(_editableNote, true);
         autoIncrementedId.then((value) {
           _editableNote.id = value;
         });
       } else {
-        noteDB.insertNote(
-            _editableNote, false); // for updating the existing note
+        noteDB.insertNote(_editableNote, false);
       }
     }
   }
 
-// this function will ne used to save the updated editing value of the note to the local variables as user types
   void updateNoteObject() {
     _editableNote.content = _contentController.text;
     _editableNote.title = _titleController.text;
     _editableNote.noteColor = noteColor;
-    print("new content: ${_editableNote.content}");
-    print(widget.noteInEditing);
-    print(_editableNote);
-
-    print("same title? ${_editableNote.title == _titleFrominitial}");
-    print("same content? ${_editableNote.content == _contentFromInitial}");
 
     if (!(_editableNote.title == _titleFrominitial &&
             _editableNote.content == _contentFromInitial) ||
         (_isNewNote)) {
-      // No changes to the note
-      // Change last edit time only if the content of the note is mutated in compare to the note which the page was called with.
       _editableNote.dateLastEdited = DateTime.now();
-      print("Updating date_last_edited");
       CentralStation.updateNeeded = true;
     }
   }
 
   void bottomSheetOptionTappedHandler(moreOptions tappedOption) {
-    print("option tapped: $tappedOption");
     switch (tappedOption) {
       case moreOptions.delete:
         {
@@ -309,7 +297,6 @@ class _NotePageState extends State<NotePage> {
   }
 
   void _changeColor(Color newColorSelected) {
-    print("note color changed");
     setState(() {
       noteColor = newColorSelected;
       _editableNote.noteColor = newColorSelected;
@@ -337,8 +324,6 @@ class _NotePageState extends State<NotePage> {
 
   Future<bool> _readyToPop() async {
     _persistenceTimer.cancel();
-    //show saved toast after calling _persistData function.
-
     _persistData();
     return true;
   }
@@ -374,15 +359,13 @@ class _NotePageState extends State<NotePage> {
 
   void _archiveThisNote(BuildContext context) {
     Navigator.of(context).pop();
-    // set archived flag to true and send the entire note object in the database to be updated
     _editableNote.isArchived = 1;
     var noteDB = NotesDBHandler();
     noteDB.archiveNote(_editableNote);
-    // update will be required to remove the archived note from the staggered view
     CentralStation.updateNeeded = true;
-    _persistenceTimer.cancel(); // shutdown the timer
+    _persistenceTimer.cancel();
 
-    Navigator.of(context).pop(); // pop back to staggered view
+    Navigator.of(context).pop();
     Scaffold.of(context).showSnackBar(new SnackBar(content: Text("deleted")));
   }
 
@@ -401,10 +384,8 @@ class _NotePageState extends State<NotePage> {
   }
 
   void _undo() {
-    _titleController.text = _titleFrominitial; // widget.noteInEditing.title;
-    _contentController.text =
-        _contentFromInitial; // widget.noteInEditing.content;
-    _editableNote.dateLastEdited =
-        _lastEditedForUndo; // widget.noteInEditing.date_last_edited;
+    _titleController.text = _titleFrominitial;
+    _contentController.text = _contentFromInitial;
+    _editableNote.dateLastEdited = _lastEditedForUndo;
   }
 }

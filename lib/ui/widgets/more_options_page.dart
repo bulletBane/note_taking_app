@@ -67,8 +67,7 @@ class _MoreOptionsSheetState extends State<MoreOptionsSheet> {
               width: MediaQuery.of(context).size.width,
               child: ColorSlider(
                 callBackColorTapped: _changeColor,
-                // call callBack from notePage here
-                noteColor: voteColor, // take color from local variable
+                noteColor: voteColor,
               ),
             ),
           ),

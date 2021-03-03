@@ -25,28 +25,19 @@ class _MyStaggeredTileState extends State<MyStaggeredTile> {
     tileColor = widget.note.noteColor;
     title = widget.note.title;
 
-    return GestureDetector(
-      onTap: () => _noteTapped(context),
-      child: Container(
-        decoration: BoxDecoration(
-            border: tileColor == Colors.white
-                ? Border.all(color: CentralStation.borderColor)
-                : null,
-            color: tileColor,
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        padding: EdgeInsets.all(8),
-        child: constructChild(),
-      ),
+    return Container(
+      decoration: BoxDecoration(
+          border: tileColor == Colors.white
+              ? Border.all(color: CentralStation.borderColor)
+              : null,
+          color: tileColor,
+          borderRadius: BorderRadius.all(Radius.circular(8))),
+      padding: EdgeInsets.all(8),
+      child: constructChild(context),
     );
   }
 
-  void _noteTapped(BuildContext ctx) {
-    CentralStation.updateNeeded = false;
-    Navigator.push(
-        ctx, MaterialPageRoute(builder: (ctx) => NotePage(widget.note)));
-  }
-
-  Widget constructChild() {
+  Widget constructChild(BuildContext context) {
     List<Widget> contentsOfTiles = [];
 
     if (widget.note.title.length != 0) {
@@ -72,10 +63,17 @@ class _MyStaggeredTileState extends State<MyStaggeredTile> {
       maxLines: 10,
       textScaleFactor: 1.5,
     ));
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: contentsOfTiles);
+    return InkWell(
+      onTap: () {
+        CentralStation.updateNeeded = false;
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => NotePage(widget.note)));
+      },
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: contentsOfTiles),
+    );
   }
 
   double _determineFontSizeForContent() {

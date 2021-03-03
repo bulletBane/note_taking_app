@@ -26,14 +26,12 @@ class CentralStation {
 
   static String stringForDatetime(DateTime dt) {
     var dtInLocal = dt.toLocal();
-    //DateTime.fromMillisecondsSinceEpoch( 1490489845  * 1000).toLocal(); //year:  1490489845 //>day: 1556152819  //month:  1553561845  //<day: 1556174419
     var now = DateTime.now().toLocal();
     var dateString = "Edited ";
 
     var diff = now.difference(dtInLocal);
 
     if (now.day == dtInLocal.day) {
-      // creates format like: 12:35 PM,
       var todayFormat = DateFormat("h:mm a");
       dateString += todayFormat.format(dtInLocal);
     } else if ((diff.inDays) == 1 ||

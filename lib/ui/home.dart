@@ -44,7 +44,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _body() {
-    print(notesViewType);
     return Container(
         child: StaggeredGridPage(
       notesViewType: notesViewType,
@@ -67,7 +66,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _newNoteTapped(BuildContext ctx) {
-    // "-1" id indicates the note is not new
     var emptyNote =
         new Note(-1, "", "", DateTime.now(), DateTime.now(), Colors.white);
     Navigator.push(

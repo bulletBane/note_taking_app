@@ -30,10 +30,8 @@ class NotesDBHandler {
   initDB() async {
     var path = await getDatabasesPath();
     var dbPath = join(path, 'notes.db');
-    // ignore: argument_type_not_assignable
     Database dbConnection = await openDatabase(dbPath, version: 1,
         onCreate: (Database db, int version) async {
-      print("executing create query from onCreate callback");
       await db.execute(_buildCreateQuery());
     });
 
@@ -42,13 +40,11 @@ class NotesDBHandler {
     return dbConnection;
   }
 
-// build the create query dynamically using the column:field dictionary.
   String _buildCreateQuery() {
     String query = "CREATE TABLE IF NOT EXISTS ";
     query += tableName;
     query += "(";
     fieldMap.forEach((column, field) {
-      print("$column : $field");
       query += "$column $field,";
     });
 
@@ -64,11 +60,8 @@ class NotesDBHandler {
   }
 
   Future<int> insertNote(Note note, bool isNew) async {
-    // Get a reference to the database
     final Database db = await database;
-    print("insert called");
 
-    // Insert the Notes into the correct table.
     await db.insert(
       'notes',
       isNew ? note.toMap(false) : note.toMap(true),
@@ -76,7 +69,6 @@ class NotesDBHandler {
     );
 
     if (isNew) {
-      // get latest note which isn't archived, limit by 1
       var one = await db.query("notes",
           orderBy: "date_last_edited desc",
           where: "is_archived = ?",
@@ -94,7 +86,6 @@ class NotesDBHandler {
       await db.insert("notes", note.toMap(false),
           conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (Error) {
-      print(Error);
       return false;
     }
     return true;
@@ -118,7 +109,6 @@ class NotesDBHandler {
         await db.delete("notes", where: "id = ?", whereArgs: [note.id]);
         return true;
       } catch (Error) {
-        print("Error deleting ${note.id}: ${Error.toString()}");
         return false;
       }
     }
@@ -126,7 +116,6 @@ class NotesDBHandler {
 
   Future<List<Map<String, dynamic>>> selectAllNotes() async {
     final Database db = await database;
-    // query all the notes sorted by last edited
     var data = await db.query("notes",
         orderBy: "date_last_edited desc",
         where: "is_archived = ?",
